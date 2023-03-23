@@ -7,3 +7,6 @@ app = Flask(__name__)
 def index():
     print("Xcution_Testing_Site")
     return render_template("home.html.jinja")
+
+if __name__ == '__main__':
+    app.run(debug=True)
