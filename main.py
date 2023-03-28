@@ -26,7 +26,7 @@ connection = pymysql.connect(
 def post():
     cursor=connection.cursor()
 
-    cursor.execute("SELECT * FROM `Posts` ORDER BY `date`")
+    cursor.execute("SELECT * FROM `Posts` JOIN `Users` ON `Posts`.`user_id` = `Users`.`id` ORDER BY `date` DESC;")
 
     results = cursor.fetchall()
 
