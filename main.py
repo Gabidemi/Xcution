@@ -45,7 +45,7 @@ def sign_up():
             INSERT INTO `users` (`username`, `password`, `email`, `date-of-birth`, `photo`, `display-name`, `phone-number`, )
             VALUES(%s, %s, %s, %s, %s, %s, %s)
         
-        """, [])
+        """, [request])
 
 
 
