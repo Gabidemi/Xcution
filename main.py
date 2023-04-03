@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect
-from flask_login import LoginManager
+from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 import pymysql
 import pymysql.cursors
 
@@ -9,6 +9,8 @@ login_manager = LoginManager()
 
 app = Flask(__name__)
 login_manager.init_app(app)
+
+app.config['SECRET_KEY'] = 'something_random'
 
 
 class User:
@@ -26,7 +28,7 @@ class User:
 
 @login_manager.user_loader
 def user_loader(user_id):
-    cursor = connection.cursor
+    cursor = connection.cursor()
 
     cursor.execute("SELECT * FROM `Users` WHERE `id` = " + user_id)
 
@@ -36,6 +38,8 @@ def user_loader(user_id):
         return None
     
     return User(result['id'], result['username'], result['banned'])
+
+
 
 
 @app.route("/")
@@ -56,7 +60,8 @@ connection = pymysql.connect(
 )
 
 
-@app.route("/post")
+@app.route("/feed")
+@login_required
 def post():
     cursor=connection.cursor()
 
@@ -67,11 +72,49 @@ def post():
     return render_template("post.html.jinja", posts = results)
 
 
-@app.route("/sign-in")
+@app.route("/sign-in", methods=['POST', 'GET'])
 def sign_in():
-    return render_template("sign_in.html.jinja")
+    if current_user.is_authenticated:
+        return redirect('/feed')
+    if request.method == 'POST':
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * FROM `Users` WHERE `username` = '{request.form['username']}' ")
+        result = cursor.fetchone()
+
+        if result is None:
+            return render_template("sign-in.html.jinja")
+
+        if request.form['password'] == result['password']:
+            user = User(result['id'], result['username'], result['banned'])
+
+            login_user(user)
+
+            return redirect('/feed')
+        else:
+            return render_template("sign_in.html.jinja")
+
+
+
+        return request.form
+    
+    elif request.method == 'GET':
+        return render_template("sign_in.html.jinja")
+    
+
+
+
+@app.route('/sign-out')
+def sign_out():
+    logout_user()
+
+    return redirect('/sign-in')
+
+
+
 @app.route("/sign-up", methods=['POST', 'GET'])
 def sign_up():
+    if current_user.is_authenticated:
+        return redirect('/feed')
     if request.method == 'POST':
         #handle signup
         cursor = connection.cursor()
