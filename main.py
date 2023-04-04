@@ -146,5 +146,23 @@ def sign_up():
         return render_template("sign_up.html.jinja")
 
 
+@app.route('/post', methods=['POST'])
+@login_required
+def create_post():
+    cursor = connection.cursor()
+    profile = request.files['file']
+    file_name = profile.filename
+    file_extension = file_name.split('.')[-1]
+
+    if file_extension in ['jpg', 'jpeg', 'png', 'gif']:
+        profile.save('media/posts/' + file_name)
+    else:
+        raise Exception('invalid file type')
+    user_id = current_user.id
+    cursor.execute("""INSERT INTO `Posts` (`post_image`, `post_feed`, `user_id`) VALUES(%s, %s, %s)""", (file_name, request.form['text'], user_id))
+    return redirect('/feed')
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
