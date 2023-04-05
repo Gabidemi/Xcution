@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_from_directory
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 import pymysql
 import pymysql.cursors
@@ -137,7 +137,7 @@ def sign_up():
         
         """, (request.form['username'], request.form['password'], request.form['email'], request.form['date'], file_name, request.form['display'], request.form['phone-number']))
 
-        return redirect('/post')
+        return redirect('/sign-in')
 
 
 
@@ -158,9 +158,16 @@ def create_post():
         profile.save('media/posts/' + file_name)
     else:
         raise Exception('invalid file type')
+    
     user_id = current_user.id
+
     cursor.execute("""INSERT INTO `Posts` (`post_image`, `post_feed`, `user_id`) VALUES(%s, %s, %s)""", (file_name, request.form['text'], user_id))
     return redirect('/feed')
+
+
+@app.get('/media/<path:path>')
+def send_media(path):
+    return send_from_directory('media', path)
 
 
 

@@ -66,10 +66,8 @@ body {
     <div>
       <h3 class="float-md-start mb-0">Xcution</h3>
       <nav class="nav nav-masthead justify-content-center float-md-end">
-        <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="#">Home</a>
-        <a class="nav-link fw-bold py-1 px-0" href="#">Features</a>
-        <a class="nav-link fw-bold py-1 px-0" href="#">Contact</a>
-        <a class="nav-link fw-bold py-1 px-0" href="#">Forum</a>
+        <a class="nav-link fw-bold py-1 px-0" aria-current="page" href="/">| Home |</a>
+        <a class="nav-link fw-bold py-1 px-0 active" href="/feed">| Feed |</a>
         <a class="nav-link fw-bold py-1 px-0" href="/sign-out">| Sign-Out |</a>
       </nav>
     </div>
@@ -89,7 +87,7 @@ body {
         <p>{{post['username']}}</p>
         <p>Date: {{post['date'].strftime("%A, %b - %d - %Y")}}</p>
         <p>{{post['post_feed']}}</p>
-            <img src="{{post['post_image']}}" height="500" width="760">
+            <img src="/media/posts/{{post['post_image']}}" height="500" width="760">
             <p>shares: {{post['share_amount']}}</p>
         </div>
     {% endfor %}
