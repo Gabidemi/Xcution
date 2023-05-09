@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, send_from_directory, g
+from flask import Flask, render_template, request, redirect, send_from_directory, g, abort
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 import pymysql
 import pymysql.cursors
@@ -30,7 +30,7 @@ class User:
 def user_loader(user_id):
     cursor = get_db().cursor()
 
-    cursor.execute("SELECT * FROM `Users` WHERE `id` = " + user_id)
+    cursor.execute("SELECT * FROM `Users` WHERE `id` = %s" , (user_id))
 
     result = cursor.fetchone()
 
@@ -70,6 +70,28 @@ def close_db(error):
     if hasattr(g, 'db'):
         g.db.close() 
 
+@app.errorhandler(404)
+def page_not_found(err):
+    return render_template('error_status.html.jinja'), 404
+
+
+@app.route("/profile/<username>")
+def profile(username):
+    cursor = get_db().cursor()
+    cursor.execute("SELECT * FROM `post` WHERE `username` = %s", (username))
+    result = cursor.fetchone()
+    cursor.close
+
+    if result is None:
+        abort(404)
+
+    cursor = get_db().cursor()
+    cursor.execute("SELECT * FROM `post` WHERE user_id = %s", (result['id]']))
+    post_result = cursor.fetchall()
+    cursor.close()
+
+
+
 
 @app.route("/feed")
 @login_required
@@ -89,7 +111,7 @@ def sign_in():
         return redirect('/feed')
     if request.method == 'POST':
         cursor = get_db().cursor()
-        cursor.execute(f"SELECT * FROM `Users` WHERE `username` = '{request.form['username']}' ")
+        cursor.execute("SELECT * FROM `Users` WHERE `username` = %s ", (request.form['username']))
         result = cursor.fetchone()
 
         if result is None:
@@ -184,3 +206,4 @@ def send_media(path):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
